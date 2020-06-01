@@ -358,3 +358,14 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+JamToast.sln
+
+obj/Debug/netcoreapp3.1/JamToast.assets.cache
+
+obj/Debug/netcoreapp3.1/JamToast.csprojAssemblyReference.cache
+
+obj/JamToast.csproj.nuget.dgspec.json
+
+obj/JamToast.csproj.nuget.g.props
+
+obj/project.assets.json
