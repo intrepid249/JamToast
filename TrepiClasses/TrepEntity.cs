@@ -11,8 +11,9 @@ namespace JamToast
         protected double BlockChance, HitChance;
         public String Name { get; private set; }
 
-        public TrepEntity(float maxHealth, float atkDamage, double blockChance, double hitChance)
+        public TrepEntity(String name, float maxHealth, float atkDamage, double blockChance, double hitChance)
         {
+            Name = name;
             Health = MaxHealth = maxHealth;
             AtkDamage = atkDamage;
             BlockChance = blockChance;
