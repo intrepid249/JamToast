@@ -6,21 +6,26 @@ namespace JamToast
 {
     class Entity
     {
-        protected float Health, MaxHealth;
-        protected float AttackDamage;
-        public string Name { get; private set; }
+        protected float Health, MaxHealth;          //amount of health the entity currently has aswell as thier max health
+        protected float AttackDamage;               //amount of damage you can deal
+        public string Name { get; private set; }    //name of entity
 
-        protected double BlockChance;
-        protected double HitChance;
+        protected double BlockChance;               //chance to block an attack that has hit you
+        protected double HitChance;                 //chance to hit another entity
         
 
-        public Entity(float maxHealth, float attackDamage, double blockChance, double hitChance)
+        public Entity(string name, float maxHealth, float attackDamage, double blockChance, double hitChance)
         {
+            Name = name;
+
+            //set maxhealth and use that to set current health
             MaxHealth = maxHealth;
             Health = MaxHealth;
 
+            //set attack damage
             AttackDamage = attackDamage;
 
+            //set block and hit chance
             BlockChance = blockChance;
             HitChance = hitChance;
             
@@ -38,7 +43,8 @@ namespace JamToast
         }
 
         bool BlockAttack()
-        {//make new random instance
+        {
+            //make new random instance
             Random rand = new Random();
             if (rand.NextDouble() <= BlockChance)   //if it blocks
             {
