@@ -6,13 +6,14 @@ namespace JamToast
 {
     class Entity
     {
-        protected float Health, MaxHealth;          //amount of health the entity currently has aswell as thier max health
-        protected float AttackDamage;               //amount of damage you can deal
+        public float Health { get; protected set; }
+        public float MaxHealth { get; protected set; }          //amount of health the entity currently has aswell as thier max health
+        public float AttackDamage { get; protected set; }               //amount of damage you can deal
         public string Name { get; private set; }    //name of entity
 
-        protected double BlockChance;               //chance to block an attack that has hit you
-        protected double HitChance;                 //chance to hit another entity
-        
+        public double BlockChance { get; protected set; }               //chance to block an attack that has hit you
+        public double HitChance { get; protected set; }                 //chance to hit another entity
+
 
         public Entity(string name, float maxHealth, float attackDamage, double blockChance, double hitChance)
         {
@@ -31,7 +32,7 @@ namespace JamToast
             
         }
 
-        bool MakeAttack(Entity target)
+        public bool MakeAttack()
         {
             //make new random instance
             Random rand = new Random();
@@ -42,7 +43,7 @@ namespace JamToast
             return false;       //misses
         }
 
-        bool BlockAttack()
+        public bool BlockAttack()
         {
             //make new random instance
             Random rand = new Random();
@@ -55,7 +56,7 @@ namespace JamToast
         }
 
 
-        void TakeDamage(float Ammount)
+        public void TakeDamage(float Ammount)
         {
             Health -= Ammount;  //deal damage
         }

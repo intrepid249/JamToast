@@ -7,9 +7,9 @@ namespace JamToast
     class Game
     {
         Player player;
-        bool GameRunning;
+        public static bool GameRunning;
 
-        List<Enemy> enemyTypes;
+        
         
 
         public Game()
@@ -24,18 +24,11 @@ namespace JamToast
         {
             GameRunning = true;
             InitPlayer();
-            InitEnemyTypes();
+            
             RunGame();
         }
 
-        void InitEnemyTypes()
-        {
-            enemyTypes.Add(new Enemy("dorru", 10000, 1, 0.6, 1));
-            enemyTypes.Add(new Enemy("Mindless Servent", 60, 5, 0.1, 0.45));
-            enemyTypes.Add(new Enemy("Flying Pumpkin Head", 15, 20, 0.75, 0.3));
-            enemyTypes.Add(new Enemy("Wool Construct", 250, 10, 0.2, 0.2));
-
-        }
+        
 
         void InitPlayer()
         {
@@ -51,16 +44,48 @@ namespace JamToast
             {
                 Console.WriteLine("Hmmmm... I do not like the name of \"" + player.Name + "\".\nYou will now be called Dorang.");
             }
+
+            WaitToContinue();
         }
 
         void RunGame()
         {
+            Encoutner encounter = new Encoutner(player);
             while (GameRunning)
             {
-                Console.WriteLine("You are in a forrest. A thick fog permeates the atmosphere. Penetrating your very soul.\n[Press Any Key to Continue]");
-                Console.ReadKey();
+                Console.WriteLine("You are in a forest. A thick fog permeates the atmosphere. Penetrating your very soul.");
+                WaitToContinue();
+
                 
+                encounter.RunEncounter();
+
+
+
+                EndGame();
             }
+        }
+
+       
+
+        static public void WaitToContinue()
+        {
+            Console.WriteLine();
+            Console.WriteLine("=================================");
+            Console.WriteLine("--==[Press Enter to Continue]==--");
+            Console.WriteLine("=================================");
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+        public static void EndGame() //TODO make it restart properly
+        {
+            Console.WriteLine();
+            Console.WriteLine("=====================================");
+            Console.WriteLine("--==[Press Enter to Restart Game]==--");
+            Console.WriteLine("=====================================");
+            Console.ReadKey();
+
+            GameRunning = false;
         }
 
         
