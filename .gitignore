@@ -358,6 +358,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+<<<<<<< Updated upstream
 JamToast.sln
 
 obj/Debug/netcoreapp3.1/JamToast.assets.cache
@@ -369,3 +370,6 @@ obj/JamToast.csproj.nuget.dgspec.json
 obj/JamToast.csproj.nuget.g.props
 
 obj/project.assets.json
+=======
+obj/Debug/netcoreapp3.1/JamToast.csprojAssemblyReference.cache
+>>>>>>> Stashed changes
