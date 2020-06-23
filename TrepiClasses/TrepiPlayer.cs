@@ -72,6 +72,9 @@ namespace JamToast.TrepiClasses
                     Console.WriteLine("You have " + pointsRemaining + " skill points remaining");
                     Console.WriteLine("How many points will you assign to [Dexterity]?");
                     int tempDex;
+
+                    
+
                     if (int.TryParse(Console.ReadLine(), out tempDex) && tempDex <= pointsRemaining && tempDex >= 0)
                     {
                         output[1] = tempDex;

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using JamToast.TrepiClasses;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace JamToast
 {
-    class TrepiEntity
+    class TrepiEntity : TrepiSpawnable
     {
-        public string Name { get; private set; }                        //name of entity
         public int Level { get; protected set; }                        //level of entity
 
 
@@ -23,18 +23,15 @@ namespace JamToast
         public int Constitution { get; protected set; }
 
 
-        public TrepiEntity(int lvl, string name, int str, int dex, int con)
+        public TrepiEntity(int lvl, string name, int str, int dex, int con) : base(name)
         {
             Level = lvl;
-
-            Name = name;
 
             Strength = str;
             Dexterity = dex;
             Constitution = con;
 
             CalculateStats();
-
         }
 
         protected void CalculateHealth()
@@ -96,6 +93,11 @@ namespace JamToast
         public void TakeDamage(float Ammount)
         {
             Health -= Ammount;  //deal damage
-        }     
+        }
+
+        public void AddHealth(float Amount)
+        {
+            Health += Amount;   //Heal damage
+        }
     }
 }

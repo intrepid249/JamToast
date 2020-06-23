@@ -1,14 +1,13 @@
-﻿using Microsoft.VisualBasic.CompilerServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace JamToast.TrepiClasses
 {
     enum TrepiEncounterType
     {
         None,
-        Enemy
+        Enemy,
+        Consumable
     }
 
     class TrepiEncounter : ITrepiEnounter
@@ -17,9 +16,12 @@ namespace JamToast.TrepiClasses
         public List<Action> Results { get; private set; }
 
 
-        private List<TrepiEnemy> EnemyTypes = new List<TrepiEnemy>();
-        private List<TrepiEntity> Spawnables = new List<TrepiEntity>();
+        private List<TrepiEnemy> Enemies = new List<TrepiEnemy>();
+        private List<TrepiConsumable> Consumables = new List<TrepiConsumable>();
+        private List<TrepiLoreEntity> LoreEntities = new List<TrepiLoreEntity>();
+        private List<TrepiSpawnable> Spawnables = new List<TrepiSpawnable>();
 
+        private int PreviousEntity = -1;
 
         private bool HasEnded = false;
         private TrepiEncounterType TypeOfEncounter = TrepiEncounterType.None;
@@ -29,27 +31,59 @@ namespace JamToast.TrepiClasses
         {
             Player = player;
 
-            InitEnemyTypes();
+            InitEnemies();
+            InitConsumables();
+            InitLoreEntities();
             InitSpawnables();
             
             Options = new List<string>();
             Results = new List<Action>();
         }
 
-        void InitEnemyTypes()
+        void InitEnemies()
         {
-            EnemyTypes.Add(new TrepiEnemy("Mindless Servant", 1, 2, 3));
-            EnemyTypes.Add(new TrepiEnemy("Flying Pumpkin Head", 2, 1, 4));
-            EnemyTypes.Add(new TrepiEnemy("Wall Construct", 0, 1, 10));
-            EnemyTypes.Add(new TrepiEnemy("Morphed Monstrocity", 4, 3, 1));
-            EnemyTypes.Add(new TrepiEnemy("Mound of Bones", 4, 2, 6)); // Pile of Struggling bones -> Cobbled Skeleton -> Skeleton
+            Enemies.Add(new TrepiEnemy("Mindless Servant", 1, 2, 3));
+            Enemies.Add(new TrepiEnemy("Flying Pumpkin Head", 2, 1, 4));
+            Enemies.Add(new TrepiEnemy("Wall Construct", 0, 1, 10));
+            Enemies.Add(new TrepiEnemy("Morphed Monstrocity", 4, 3, 1));
+            Enemies.Add(new TrepiEnemy("Mound of Bones", 4, 2, 6)); // Pile of Struggling bones -> Cobbled Skeleton -> Skeleton
+        }
+
+        void InitConsumables()
+        {
+            TrepiConsumable HealthPot = new TrepiConsumable("Health Potion", 15);
+            HealthPot.AddDiscoveredFlairText("A strange vial holding bright red liquid rolls out from under a bush...\nWhat do you want to do?");
+            HealthPot.AddDiscoveredFlairText("Something glints in the leaves at the corner of your eyes. Upon investigation it is a small round bottle holding a bright red liquid");
+            HealthPot.AddConsumedFlairText("You feel a strange tingle as the liquid enters your body, soothing your aches and pains");
+            HealthPot.AddConsumedFlairText("As you drink the liquid, it feels as though life is entering your body, empowering you and revitalising your wounds");
+            HealthPot.AddDeclinedFlairText("The crimson liquid makes you feel somewhat unsettled. You don't feel good about consuming the strange bubbling liquid");
+            HealthPot.AddDeclinedFlairText("Science was never your strong suit, neither was your curiosity. Better to let sleeping cats lie");
+            Consumables.Add(HealthPot);
+        }
+
+        void InitLoreEntities()
+        {
+            LoreEntities.Add(new TrepiLoreEntity("As time passes, the noise of the forest seems to die down... " +
+                "Every snap of a twig sounds deafening in the silence"));
+            LoreEntities.Add(new TrepiLoreEntity("An ungodly shriek echoes through the dense forest, sending chills down your spine. " +
+                "Twigs snap in the near distance, just beyond your sight"));
         }
 
         void InitSpawnables()
         {
-            foreach (TrepiEntity enemy in EnemyTypes)
+            foreach (TrepiEntity enemy in Enemies)
             {
                 Spawnables.Add(enemy);
+            }
+
+            foreach (TrepiConsumable consumable in Consumables)
+            {
+                Spawnables.Add(consumable);
+            }
+
+            foreach (TrepiLoreEntity loreEntity in LoreEntities)
+            {
+                Spawnables.Add(loreEntity);
             }
         }
 
@@ -110,13 +144,32 @@ namespace JamToast.TrepiClasses
 
         public void RunEncounter() 
         {
-            
             // Choose a random entity from the list of spawnable entities for the Encounter
-            TrepiEntity entity = Spawnables[GetRandomIndex(Spawnables.Count)];
+            int entityIdx = GetRandomIndex(Spawnables.Count);
+            Console.WriteLine("EntityIdx: " + entityIdx + " PreviousEntity: " + PreviousEntity);
+            TrepiSpawnable entity = Spawnables[entityIdx];
+
+            if (PreviousEntity != -1)
+            {
+                Console.WriteLine("Checking for the same generated entity...");
+                int newIdx = -1;
+                while (PreviousEntity == entityIdx)
+                {
+                    newIdx = GetRandomIndex(Spawnables.Count);
+                    Console.WriteLine("newIdx: " + newIdx);
+                    entity = Spawnables[newIdx];
+
+                    Console.WriteLine("Setting PreviousEntity to newIdx: " + newIdx);
+                    PreviousEntity = newIdx;
+                }
+            }
 
             // Check for the entity type and set appropriate options and results
             if (entity is TrepiEnemy)
             {
+                TrepiEnemy enemy = (TrepiEnemy)entity;
+                TypeOfEncounter = TrepiEncounterType.Enemy;
+
                 Console.WriteLine("A " + entity.Name + " charges at you from the shadows, smashing branches out of its path!");
 
                 Console.WriteLine();
@@ -125,10 +178,10 @@ namespace JamToast.TrepiClasses
 
                 SetOptions("Fight", "Flee");
                 SetResults(
+                    // Fight
                     () => {Console.WriteLine("You raise your fist in anger and declare war!");}, 
+                    // Flee
                     () => {Console.WriteLine("You run away, crying like a baby...");});
-
-                TypeOfEncounter = TrepiEncounterType.Enemy;
 
                 int resultIndex = GetAndDisplayOptionsChoice();
                 Results[resultIndex]();
@@ -139,6 +192,7 @@ namespace JamToast.TrepiClasses
                     SetOptions("Attack", "Block", "Flee");
 
                     SetResults(
+                        // Attack
                         () => 
                         {
                             List<string> hitResults = new List<string>();
@@ -150,17 +204,18 @@ namespace JamToast.TrepiClasses
                             missResults.Add("You fix " + entity.Name + " with a deathly stare... Too bad you're crosseyed...");
                             missResults.Add("You trip over a leaf trying to throw a punch... Nice work =)");
 
-                            if (Player.MakeAttack() && !entity.BlockAttack())
+                            if (Player.MakeAttack() && !enemy.BlockAttack())
                             {
                                 Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)]);
                                 Console.WriteLine();
-                                entity.TakeDamage(Player.AtkDamage);
+                                enemy.TakeDamage(Player.AtkDamage);
                             } else
                             {
                                 Console.WriteLine(missResults[GetRandomIndex(missResults.Count)]);
                                 Console.WriteLine();
                             }
                         },
+                        // Block
                         () => 
                         {
                             Player.isBlocking = true;
@@ -170,14 +225,14 @@ namespace JamToast.TrepiClasses
                             Console.WriteLine("You brace yourself for an attack!");
                             Console.WriteLine();
                         },
+                        // Flee
                         () =>
                         {
                             Console.WriteLine("You run away, crying like a baby...");
                             HasEnded = true;
-                            TrepiGame.WaitToContinue();
-                            TrepiEncounter encounter = new TrepiEncounter(Player);
-                            encounter.RunEncounter();
+                            StartNewEncounter(entityIdx);
                         }
+
                     );
 
                     while (!HasEnded) 
@@ -185,7 +240,7 @@ namespace JamToast.TrepiClasses
                         if (Player.Health > 0)
                         {
 
-                            if (entity.Health > 0)
+                            if (enemy.Health > 0)
                             {
                                 Console.Clear();
                                 TrepiGame.WriteTitle("BATTLE");
@@ -203,7 +258,7 @@ namespace JamToast.TrepiClasses
 
                                 TrepiGame.WaitToContinue();
 
-                                if (entity.MakeAttack())
+                                if (enemy.MakeAttack())
                                 {
                                     List<string> hitResults = new List<string>();
                                     hitResults.Add("The " + entity.Name + " swings a fist at you and hits you square in the face!");
@@ -223,7 +278,7 @@ namespace JamToast.TrepiClasses
                                             Console.WriteLine("You try to block the attack, but alas!");
                                             Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)]);
                                             Console.WriteLine();
-                                            Player.TakeDamage(entity.AtkDamage);
+                                            Player.TakeDamage(enemy.AtkDamage);
                                         }
                                         Player.isBlocking = false;
                                     } else
@@ -231,7 +286,7 @@ namespace JamToast.TrepiClasses
                                         // if the monster hits the player
                                         Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)]);
                                         Console.WriteLine();
-                                        Player.TakeDamage(entity.AtkDamage);
+                                        Player.TakeDamage(enemy.AtkDamage);
                                     }
                                 } else
                                 {
@@ -252,10 +307,7 @@ namespace JamToast.TrepiClasses
                                 victories.Add("You have slain the " + entity.Name + "!");
 
                                 Console.WriteLine(victories[GetRandomIndex(victories.Count)]);
-                                TrepiGame.WaitToContinue();
-
-                                TrepiEncounter encounter = new TrepiEncounter(Player);
-                                encounter.RunEncounter();
+                                StartNewEncounter(entityIdx);
                             }
                         } else
                         {
@@ -281,10 +333,46 @@ namespace JamToast.TrepiClasses
                 {
                     // If we choose to flee
                     HasEnded = true;
-                    TrepiGame.WaitToContinue();
-                    TrepiEncounter encounter = new TrepiEncounter(Player);
-                    encounter.RunEncounter();
+                    StartNewEncounter(entityIdx);
                 }
+            }
+
+            if (entity is TrepiConsumable)
+            {
+                TrepiConsumable item = (TrepiConsumable)entity;
+
+                Console.WriteLine(item.GetRandomDiscoveredFlair());
+
+                SetOptions("Consume", "Leave Alone");
+                SetResults(
+                    // Consume
+                    () => 
+                    {
+                        Console.WriteLine(item.GetRandomConsumedFlair());
+                        if (item is ITrepiHealthItem)
+                        {
+                            Console.WriteLine("[You gain " + item.NutritionValue + "health]");
+                            item.Heal(Player);
+                        }
+
+                        StartNewEncounter(entityIdx);
+                    },
+                    // Leave Alone
+                    () => 
+                    {
+                        Console.WriteLine(item.GetRandomDeclinedFlair());
+                        StartNewEncounter(entityIdx);
+                    }
+                    );
+
+                int resultIndex = GetAndDisplayOptionsChoice();
+                Results[resultIndex]();
+            }
+
+            if (entity is TrepiLoreEntity)
+            {
+                ((TrepiLoreEntity)entity).ShowLore();
+                StartNewEncounter(entityIdx);
             }
         }
 
@@ -294,5 +382,14 @@ namespace JamToast.TrepiClasses
             return rand.Next(0, Max);
         }
 
+        private void StartNewEncounter(int previousEntityIdx)
+        {
+            Console.WriteLine("Setting PreviousEntity to entityIdx: " + previousEntityIdx);
+            PreviousEntity = previousEntityIdx;
+
+            TrepiGame.WaitToContinue();
+
+            RunEncounter();
+        }
     }
 }
