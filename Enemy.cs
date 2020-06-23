@@ -6,8 +6,20 @@ namespace JamToast
 {
     class Enemy : Entity
     {
-        public Enemy(string name, float maxHealth, float attackDamage, double blockChance, double hitChance) : base(name, maxHealth, attackDamage, blockChance, hitChance)
+        public Enemy(string name, int str, int dex, int con) : base( -1, name, str, dex, con)
         {
+            LevelScale();
+            CalculateStats();
+        }
+
+        private void LevelScale()
+        {
+            //TODO: make enemy stats scale with level
+        }
+
+        public void SetLvl(int value)
+        {
+            Lvl = value;
         }
     }
 }

@@ -7,7 +7,8 @@ namespace JamToast
     enum EncounterType
     {
         None,
-        Enemy
+        Enemy,
+        Consumable
     }
     class Encoutner : IEncounter
     {
@@ -19,8 +20,9 @@ namespace JamToast
         private bool HasEnded = false;
         private EncounterType TypeOfEncounter = EncounterType.None;
 
-        List<Enemy> enemyTypes = new List<Enemy>();
-        private List<Entity> Spawnables = new List<Entity>();
+        private List<Enemy> Enemies = new List<Enemy>();
+        private List<Consumable> Consumables = new List<Consumable>();
+        private List<Spawnable> Spawnables = new List<Spawnable>();
 
         private Player player;
 
@@ -32,25 +34,47 @@ namespace JamToast
 
             this.player = player;
 
-            InitEnemyTypes();
+            InitEnemies();
+            InitConsumables();
             InitSpawnables();
         }
 
-        void InitEnemyTypes()
+        void InitEnemies()
         {
-            enemyTypes.Add(new Enemy("One Dorru", 10000, 1, 0.6, 1));
-            enemyTypes.Add(new Enemy("Mindless Servent", 60, 5, 0.1, 0.45));
-            enemyTypes.Add(new Enemy("Flying Pumpkin Head", 15, 20, 0.75, 0.3));
-            enemyTypes.Add(new Enemy("Wool Construct", 250, 10, 0.2, 0.2));
-            enemyTypes.Add(new Enemy("Morphed Monstrocity", 300, 20, 0, 0.7));
+            
+            Enemies.Add(new Enemy("Mindless Servent", 1, 2, 3));
+            //Enemies.Add(new Enemy("Flying Pumpkin Head", 2, 4, 1));
+            //Enemies.Add(new Enemy("Wool Construct", 0, 1, 10));
+            //Enemies.Add(new Enemy("Morphed Monstrocity", 4, 3, 1));
+            //Enemies.Add(new Enemy("Mound of Bones", 4, 2, 6)); //TODO: potentially make the name change at higher levels
+
+        }
+
+        void InitConsumables()
+        {
+
+            Consumable HealthPot = new Consumable("Health Potion", 15);
+            HealthPot.AddDiscoveredFlareText("You spot something shining in the corner of your eyes.\nAfter digging around in a bush for a bit, you find a glass phial full of red liquid!\nPopping off the old cork, a rancid smell fills your nose.\nShould you drink it?");
+            HealthPot.AddDiscoveredFlareText("As you walk through the dense foliage, you come accross a small pedestal.\nSitting on top is a Glass phail full of red liquid.\nTaking it off the pedestal, you notice that the liquid is thick and lumpy.\nPerhaps you chould drink it?");
+            HealthPot.AddConsumedFlareText("It Tastes disguasting... But you are pleasantly suprised.\nAs the thick red liquid slides down your throat, you feel oddly energised and refreshed.\n");
+            HealthPot.AddConsumedFlareText("You block your nose to make drinking it easier... It worked up until you felt the clumpy liquid touch your tounge.\nYou instantly feel more refreshed and energised after drinking it!");
+            HealthPot.AddDeclinedFlareText("You decide it might be better for your health not to drink a strange, clumpy, red liquid that smells like sweat...");
+            HealthPot.AddDeclinedFlareText("After some careful consideration... You decide not to risk drinking a mysterious liquid");
+            Consumables.Add(HealthPot);
+
+
 
         }
 
         void InitSpawnables()
         {
-            foreach (var enemy in enemyTypes)
+            foreach (var enemy in Enemies)
             {
                 Spawnables.Add(enemy);
+            }
+            foreach(Consumable consumable in Consumables)
+            {
+                Spawnables.Add(consumable);
             }
         }
 
@@ -74,14 +98,16 @@ namespace JamToast
 
         public int GetAndDisplayOptionsChoice()
         {
+            Console.WriteLine();
+
             int i = 1;
             foreach (string text in Options)
             {
-                Console.WriteLine(i + ". " + text + "\n");
+                Console.WriteLine(i + ". " + text);
 
                 ++i;
             }
-
+            Console.WriteLine();
             return ValidateInput();
         }
 
@@ -100,7 +126,7 @@ namespace JamToast
                 if (int.TryParse(Console.ReadLine(), out ChoiceIndex) && ChoiceIndex > 0 && ChoiceIndex <= Options.Count)
                 {
                     ValidResult = true;
-                    Console.WriteLine("\n====================\n\n");
+                    Game.Seperator();
                 }
             }
 
@@ -110,18 +136,22 @@ namespace JamToast
         public void RunEncounter()
         {
 
-            Entity entity = Spawnables[GetRandomIndex(Spawnables.Count)]; //choose a random entity from the list
+            Spawnable entity = Spawnables[GetRandomIndex(Spawnables.Count)]; //choose a random entity from the list
 
 
             //check for the entity type and set all the needed text to fit the result
             if (entity is Enemy) //enemy encounter
             {
+                Enemy enemy = (Enemy)entity;
+
                 TypeOfEncounter = EncounterType.Enemy;
                 SetOptions("Fight", "Flee");
-                //SetResults("You ready yourself and let out a warcry!", "You run away, embarressed by how scared you are...");
+               
                 SetResults
                     (
+                    //fight
                     () => { Console.WriteLine("You ready yourself and let out a warcry!"); },
+                    //flee
                     () => { Console.WriteLine("You run away, embarressed by how scared you are..."); }
                     );
                 Console.WriteLine("A " + entity.Name + " rushes at you!");
@@ -132,7 +162,7 @@ namespace JamToast
                 Console.WriteLine();
                 if (resultIndex == 0)
                 {
-                    Console.WriteLine("--========[Fight!]========--\n");
+                    Game.TitleBlock("Fight!");
                     SetOptions("Attack", "Block", "Flee");
 
                     
@@ -151,34 +181,37 @@ namespace JamToast
                         List<string> missResults = new List<string>();
                         missResults.Add("You flail your arms out. The " + entity.Name + " moves back a little and just watches...");
                         missResults.Add("You lose balence as you push your hand forwards. You miss the " + entity.Name + ".");
-                        missResults.Add("You hesitate for long enough that the " + entity.Name + "knew exactly how to dodge you.");
+                        missResults.Add("You hesitate for long enough that the " + entity.Name + " knew exactly how to dodge you.");
 
                         if (player.MakeAttack())
                         {
-                            if (entity.BlockAttack())
+                            if (enemy.BlockAttack())
                             {
-                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)] + "\nBut they Blocked it.\n\n====================\n\n");
+                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)] + "\nBut they Blocked it.");
+                                
                             }
                             else
                             {
-                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)] + "\n\n====================\n\n");
-                                entity.TakeDamage(player.AttackDamage);
+                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)]);
+                                enemy.TakeDamage(player.AttackDamage);
                             }
                             
                         }
                         else
                         {
-                            Console.WriteLine(missResults[GetRandomIndex(missResults.Count)] + "\n\n====================\n\n");
+                            Console.WriteLine(missResults[GetRandomIndex(missResults.Count)]);
                         }
                     },
                     () => 
                     {
                         Console.WriteLine("You Brace yourself!");
                         player.isBlocking = true;
+                        player.RegenerateStamina();
                     },
                     () =>
                     {
-                        Console.WriteLine("You run away with your tail between your legs\n\n====================\n\n");
+                        Console.WriteLine("You run away with your tail between your legs");
+                        Game.Seperator();
                         HasEnded = true;
                         Encoutner encounter = new Encoutner(player);
                         encounter.RunEncounter();
@@ -189,15 +222,16 @@ namespace JamToast
                     while (!HasEnded)
                     {
                         Console.WriteLine("========[ Player Health: " + player.Health + " ]");
-                        
+                        Console.WriteLine("========[ Player Stamina: " + player.Stamina + " ]");
+
                         if (player.Health > 0)
                         {
-                            if (entity.Health > 0)
+                            if (enemy.Health > 0)
                             {
                                 int combatChoice = GetAndDisplayOptionsChoice();
                                 Results[combatChoice]();
 
-                                if (entity.MakeAttack())
+                                if (enemy.MakeAttack())
                                 {
                                     if (player.isBlocking)
                                     {
@@ -208,14 +242,14 @@ namespace JamToast
                                         else if(!player.BlockAttack())
                                         {
                                             Console.WriteLine("You tried to block as the " + entity.Name + " attacked, but they managed to hit you!\n\n");
-                                            player.TakeDamage(entity.AttackDamage);
+                                            player.TakeDamage(enemy.AttackDamage);
                                         }
                                         player.isBlocking = false;
                                     }
                                     else if (!player.isBlocking)
                                     {
                                         Console.WriteLine("The " + entity.Name + " attacked you and hit!\n\n");
-                                        player.TakeDamage(entity.AttackDamage);
+                                        player.TakeDamage(enemy.AttackDamage);
                                     }
                                     
                                 }
@@ -226,7 +260,8 @@ namespace JamToast
                             }
                             else
                             {
-                                Console.WriteLine("\n\nYou killed the " + entity.Name + ".");
+                                Game.Seperator();
+                                Console.WriteLine("\nYou killed the " + entity.Name + ".");
                                 Game.WaitToContinue();
                                 Encoutner encounter = new Encoutner(player);
                                 encounter.RunEncounter();
@@ -236,7 +271,7 @@ namespace JamToast
                         }
                         else
                         {
-                            Console.WriteLine("\n\n  [ You have died...]");
+                            Console.WriteLine("\n\n    [ You have died...]");
                             Game.EndGame(); //TODO things will break at this point.. for now. gotta properly restart game later
                         }
 
@@ -252,6 +287,49 @@ namespace JamToast
                     Encoutner encounter = new Encoutner(player);
                     encounter.RunEncounter();
                 }
+            }
+
+            if(entity is Consumable)
+            {
+                Consumable item = (Consumable)entity;
+
+                TypeOfEncounter = EncounterType.Consumable;
+
+                Console.WriteLine(item.GetRandomDiscoveredFlare());
+
+                SetOptions("Consume Item", "Do not Consume Item");
+
+                SetResults
+                    (
+                    //consume item
+                    () => 
+                    {
+                        Console.WriteLine(item.GetRandomConsumedFlare());
+                        if(item is IHealthItem)
+                        {
+                            
+                            item.heal(player);
+
+                            Game.WaitToContinue();
+                            Encoutner encounter = new Encoutner(player);
+                            encounter.RunEncounter();
+                        }
+                    
+                    },
+                    //do not consume
+                    () => 
+                    {
+                        Console.WriteLine(item.GetRandomDeclinedFlare());
+                        Game.WaitToContinue();
+                        Encoutner encounter = new Encoutner(player);
+                        encounter.RunEncounter();
+
+                    }
+                    
+                    );
+                int resultIndex = GetAndDisplayOptionsChoice(); //get player input and store it
+                Results[resultIndex]();
+
             }
 
 
