@@ -6,33 +6,84 @@ namespace JamToast
 {
     class Entity
     {
-        public float Health { get; protected set; }
-        public float MaxHealth { get; protected set; }          //amount of health the entity currently has aswell as thier max health
-        public float AttackDamage { get; protected set; }               //amount of damage you can deal
-        public string Name { get; private set; }    //name of entity
+        public string Name { get; private set; }                        //name of entity
+        public int Lvl { get; protected set; }                            //level of entity
 
+
+        public float Health { get; protected set; }                     //current health
+        public float MaxHealth { get; protected set; }                  //amount of health the entity currently has aswell as thier max health
+        public float AttackDamage { get; protected set; }               //amount of damage you can deal
         public double BlockChance { get; protected set; }               //chance to block an attack that has hit you
         public double HitChance { get; protected set; }                 //chance to hit another entity
+        
 
 
-        public Entity(string name, float maxHealth, float attackDamage, double blockChance, double hitChance)
+
+        //generalised stats
+        public int Str { get; protected set; }
+        public int Dex { get; protected set; }
+        public int Con { get; protected set; }
+
+
+        public Entity(int lvl, string name, int str, int dex, int con)
         {
+            Lvl = lvl;
+
             Name = name;
 
-            //set maxhealth and use that to set current health
-            MaxHealth = maxHealth;
-            Health = MaxHealth;
 
-            //set attack damage
-            AttackDamage = attackDamage;
+            Str = str;
+            Dex = dex;
+            Con = con;
 
-            //set block and hit chance
-            BlockChance = blockChance;
-            HitChance = hitChance;
-            
+            CalculateStats();
+
         }
 
-        public bool MakeAttack()
+        
+
+        public void CalculateStats()  //calculate thing slike health, attack dmg, block chance, and hit chance based on CON, DEX, STR
+        {
+            //maxhealth = health
+            MaxHealth = Health = Con * 10;
+            
+
+            //attack damage
+            AttackDamage = Str + 2 + Lvl;
+
+            //block chance
+            BlockChance = Math.Clamp(Dex * 5.0f / 100, 0, 1);
+
+            //hit chance
+            HitChance = Math.Clamp(Dex * (5.0f + Dex + Lvl) / 100, 0, 1);
+
+        }
+
+        protected void CaluculateHealth()
+        {
+            //maxhealth = health
+            MaxHealth = Health = Con * 10;
+        }
+
+        protected void CalculateAttackDamage()
+        {
+            //attack damage
+            AttackDamage = Str + 2 + Lvl;
+        }
+
+        protected void CalculateBlockChance()
+        {
+            //block chance
+            BlockChance = Math.Clamp(Dex * 5.0f / 100, 0, 1);
+        }
+        protected void CalculateHitChance()
+        {
+            //hit chance
+            HitChance = Math.Clamp(Dex * (5.0f + Dex + Lvl) / 100, 0, 1);
+        }
+
+
+        public virtual bool MakeAttack()
         {
             //make new random instance
             Random rand = new Random();
@@ -43,7 +94,7 @@ namespace JamToast
             return false;       //misses
         }
 
-        public bool BlockAttack()
+        public virtual bool BlockAttack()
         {
             //make new random instance
             Random rand = new Random();
@@ -60,6 +111,7 @@ namespace JamToast
         {
             Health -= Ammount;  //deal damage
         }
+
 
       
     }

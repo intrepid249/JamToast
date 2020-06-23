@@ -32,21 +32,45 @@ namespace JamToast
 
         void InitPlayer()
         {
-            Console.WriteLine("What is your name young child?");
+            Console.WriteLine("You Open your eyes.");
+            Console.WriteLine("What is this feeling?");
+            Console.WriteLine("It's like there should be... more?");
+            Console.WriteLine("You exist.");
+            Console.WriteLine("And that is all...");
+
+            WaitToContinue();
+
+            Console.WriteLine("You hear a voice, seemingly comming from every direction.");
+            Console.WriteLine("Voice: \"What is your name young child?\"");
+            Console.WriteLine();
+            Console.WriteLine("Enter your name:");
+
             player = new Player(Console.ReadLine());
 
             Console.WriteLine();
             if (player.Name.ToLower().Contains("dorang"))
             {
-                Console.WriteLine("Ahh. " + player.Name + " is a mighty name!");
+                Console.WriteLine("Voice: \"Ahh. " + player.Name + ". A mighty name!\"");
             }
             else
             {
-                Console.WriteLine("Hmmmm... I do not like the name of \"" + player.Name + "\".\nYou will now be called Dorang.");
+                Console.WriteLine("Voice: \"Hmmmm... I do not like \"" + player.Name + "\".\nYou will now be called...\"\n\nVoice: \"[Dorang]\"");
             }
 
+            
+
             WaitToContinue();
+            Console.WriteLine("Voice: \"It wont be entertaining to watch you die instantly...\"\nVoice: \"I shall embedd you with my power to give you a fighting chance.\"\nVoice: \"For your own sake, lets hope you put on one hell of a show.\"\n\nVoice: \"Break a leg...\"");
+
+            WaitToContinue();
+
+            player.LevelUp(10);
+
+            WaitToContinue();
+
         }
+
+
 
         void RunGame()
         {
@@ -65,7 +89,7 @@ namespace JamToast
             }
         }
 
-       
+        
 
         static public void WaitToContinue()
         {
@@ -88,6 +112,14 @@ namespace JamToast
             GameRunning = false;
         }
 
-        
+        public static void Seperator()
+        {
+            Console.WriteLine("\n--=====================--\n");
+        }
+
+        public static void TitleBlock(string text)
+        {
+            Console.WriteLine("--======[ " + text + " ]======--");
+        }
     }
 }

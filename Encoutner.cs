@@ -38,11 +38,12 @@ namespace JamToast
 
         void InitEnemyTypes()
         {
-            enemyTypes.Add(new Enemy("One Dorru", 10000, 1, 0.6, 1));
-            enemyTypes.Add(new Enemy("Mindless Servent", 60, 5, 0.1, 0.45));
-            enemyTypes.Add(new Enemy("Flying Pumpkin Head", 15, 20, 0.75, 0.3));
-            enemyTypes.Add(new Enemy("Wool Construct", 250, 10, 0.2, 0.2));
-            enemyTypes.Add(new Enemy("Morphed Monstrocity", 300, 20, 0, 0.7));
+            
+            enemyTypes.Add(new Enemy("Mindless Servent", 1, 2, 3));
+            enemyTypes.Add(new Enemy("Flying Pumpkin Head", 2, 4, 1));
+            enemyTypes.Add(new Enemy("Wool Construct", 0, 1, 10));
+            enemyTypes.Add(new Enemy("Morphed Monstrocity", 4, 3, 1));
+            enemyTypes.Add(new Enemy("Mound of Bones", 4, 2, 6)); //TODO: potentially make the name change at higher levels
 
         }
 
@@ -100,7 +101,7 @@ namespace JamToast
                 if (int.TryParse(Console.ReadLine(), out ChoiceIndex) && ChoiceIndex > 0 && ChoiceIndex <= Options.Count)
                 {
                     ValidResult = true;
-                    Console.WriteLine("\n====================\n\n");
+                    Game.Seperator();
                 }
             }
 
@@ -132,7 +133,7 @@ namespace JamToast
                 Console.WriteLine();
                 if (resultIndex == 0)
                 {
-                    Console.WriteLine("--========[Fight!]========--\n");
+                    Game.TitleBlock("Fight!");
                     SetOptions("Attack", "Block", "Flee");
 
                     
@@ -151,24 +152,25 @@ namespace JamToast
                         List<string> missResults = new List<string>();
                         missResults.Add("You flail your arms out. The " + entity.Name + " moves back a little and just watches...");
                         missResults.Add("You lose balence as you push your hand forwards. You miss the " + entity.Name + ".");
-                        missResults.Add("You hesitate for long enough that the " + entity.Name + "knew exactly how to dodge you.");
+                        missResults.Add("You hesitate for long enough that the " + entity.Name + " knew exactly how to dodge you.");
 
                         if (player.MakeAttack())
                         {
                             if (entity.BlockAttack())
                             {
-                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)] + "\nBut they Blocked it.\n\n====================\n\n");
+                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)] + "\nBut they Blocked it.");
+                                
                             }
                             else
                             {
-                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)] + "\n\n====================\n\n");
+                                Console.WriteLine(hitResults[GetRandomIndex(hitResults.Count)]);
                                 entity.TakeDamage(player.AttackDamage);
                             }
                             
                         }
                         else
                         {
-                            Console.WriteLine(missResults[GetRandomIndex(missResults.Count)] + "\n\n====================\n\n");
+                            Console.WriteLine(missResults[GetRandomIndex(missResults.Count)]);
                         }
                     },
                     () => 
@@ -178,7 +180,8 @@ namespace JamToast
                     },
                     () =>
                     {
-                        Console.WriteLine("You run away with your tail between your legs\n\n====================\n\n");
+                        Console.WriteLine("You run away with your tail between your legs");
+                        Game.Seperator();
                         HasEnded = true;
                         Encoutner encounter = new Encoutner(player);
                         encounter.RunEncounter();
@@ -189,7 +192,8 @@ namespace JamToast
                     while (!HasEnded)
                     {
                         Console.WriteLine("========[ Player Health: " + player.Health + " ]");
-                        
+                        Console.WriteLine("========[ Player Stamina: " + player.Stamina + " ]");
+
                         if (player.Health > 0)
                         {
                             if (entity.Health > 0)
@@ -226,7 +230,8 @@ namespace JamToast
                             }
                             else
                             {
-                                Console.WriteLine("\n\nYou killed the " + entity.Name + ".");
+                                Game.Seperator();
+                                Console.WriteLine("\nYou killed the " + entity.Name + ".");
                                 Game.WaitToContinue();
                                 Encoutner encounter = new Encoutner(player);
                                 encounter.RunEncounter();
@@ -236,7 +241,7 @@ namespace JamToast
                         }
                         else
                         {
-                            Console.WriteLine("\n\n  [ You have died...]");
+                            Console.WriteLine("\n\n    [ You have died...]");
                             Game.EndGame(); //TODO things will break at this point.. for now. gotta properly restart game later
                         }
 
