@@ -78,7 +78,7 @@ namespace JamToast
             while (GameRunning)
             {
                 Console.WriteLine("You are in a forest. A thick fog permeates the atmosphere. Penetrating your very soul.");
-                WaitToContinue();
+                
 
                 
                 encounter.RunEncounter();
@@ -98,7 +98,8 @@ namespace JamToast
             Console.WriteLine("--==[Press Enter to Continue]==--");
             Console.WriteLine("=================================");
             Console.ReadKey();
-            Console.Clear();
+            Console.WriteLine();
+            //Console.Clear();
         }
 
         public static void EndGame() //TODO make it restart properly

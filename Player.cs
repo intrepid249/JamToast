@@ -21,15 +21,15 @@ namespace JamToast
 
         public void LevelUp(int points)
         {
-            ++Lvl;
-            Console.WriteLine("---===== [YOU HAVE LEVELED UP!] =====---");
+            ++Lvl; //pluss 1 to level
+            Console.WriteLine("---===== [YOU HAVE LEVELED UP!] =====---"); //tell the player they have leveled up
             Console.WriteLine((Lvl - 1) + " --> " + Lvl);
             Game.WaitToContinue();
-            int[] stats = QueryStatsAllocation(points);
-            ApplyStatChanges(stats[0], stats[1], stats[2]);
-            CalculateStats();
-            Console.Clear();
-            Console.WriteLine("---===== [YOUR NEW STATS ARE] =====---");
+            int[] stats = QueryStatsAllocation(points); // make them allocate skill points
+            ApplyStatChanges(stats[0], stats[1], stats[2]); //apply skill points
+            CalculateStats();   //recalculate all the stats with the new skill points
+            //Console.Clear();
+            Console.WriteLine("---===== [YOUR NEW STATS ARE] =====---"); //show the player the new stats and skill points
             Console.WriteLine("[Level " + Lvl + "]");
             PreviewPlayerStats(0,0,0);
             Console.WriteLine();
@@ -63,10 +63,6 @@ namespace JamToast
                         skillPointsRemaining -= tempSTR;
                         strAssigned = true;
                     }
-                    
-                    
-                    
-
                 }
 
                 for (bool dexAssigned = false; !dexAssigned;)
@@ -79,9 +75,7 @@ namespace JamToast
                         output[1] = tempDEX;
                         skillPointsRemaining -= tempDEX;
                         dexAssigned = true;
-                    }
-
-                    
+                    } 
                 }
 
                 for (bool conAssigned = false; !conAssigned;)
@@ -95,8 +89,6 @@ namespace JamToast
                         skillPointsRemaining -= tempCON;
                         conAssigned = true;
                     }
-
-                    
                 }
 
                 Console.WriteLine();
@@ -119,7 +111,7 @@ namespace JamToast
                     {
                         output[0] = output[1] = output[2] = 0;
                         skillPointsRemaining = skillpool;
-                        Console.Clear();
+                        //Console.Clear();
                     }
                 }
             }
@@ -143,21 +135,28 @@ namespace JamToast
         }
 
 
+
+        public void RegenerateStamina()
+        {
+            Stamina = Math.Clamp(Stamina + 1, 0, MaxStamina);
+            HitChance += Stamina * 10.0f / 100;
+        }
+
+
         public override bool MakeAttack()
         {
-            bool Attack = base.MakeAttack();
+            
             HitChance += Stamina * 10.0f / 100;
-            --Stamina;
-            Math.Clamp(Stamina, 0, MaxStamina);
+            Stamina = Math.Clamp(Stamina - 1, 0, MaxStamina);
+
+            bool Attack = base.MakeAttack();
             CalculateHitChance();
+            
             return Attack;
         }
 
         public override bool BlockAttack()
         {
-            ++Stamina;
-            Math.Clamp(Stamina, 0, MaxStamina);
-
             return base.BlockAttack();
         }
     }

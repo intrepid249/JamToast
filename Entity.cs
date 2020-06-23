@@ -4,9 +4,9 @@ using System.Text;
 
 namespace JamToast
 {
-    class Entity
+    class Entity : Spawnable
     {
-        public string Name { get; private set; }                        //name of entity
+                               
         public int Lvl { get; protected set; }                            //level of entity
 
 
@@ -25,13 +25,10 @@ namespace JamToast
         public int Con { get; protected set; }
 
 
-        public Entity(int lvl, string name, int str, int dex, int con)
+        public Entity(int lvl, string name, int str, int dex, int con) : base(name)
         {
             Lvl = lvl;
-
-            Name = name;
-
-
+            
             Str = str;
             Dex = dex;
             Con = con;
@@ -112,7 +109,10 @@ namespace JamToast
             Health -= Ammount;  //deal damage
         }
 
-
+        public void AddHealth(float Ammount)
+        {
+            Health += Ammount; //add health
+        }
       
     }
 }
