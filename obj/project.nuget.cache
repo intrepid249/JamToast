@@ -1,10 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "oBm5L+4G2oOH1s6cPjoQuAPlCxW9QtpkS1TZKYBhsCbCLu6TWwRlaY/35+zRhHM99FQklkISzO5lKmIF6KkXoQ==",
+  "dgSpecHash": "7z49/MrmcQYHLkZtRRRIUAQI+NdawCFiOfhXf0RhuO1xLPwYDDjmLqqzh19dojooC9UAO00DJ5JKTv12X6vvRg==",
   "success": true,
   "projectFilePath": "D:\\Github\\Dorang Dorru\\JamToast\\JamToast.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\jackw\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\3.1.2\\microsoft.aspnetcore.app.ref.3.1.2.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }

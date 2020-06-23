@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace JamToast.TrepiClasses
 {
     class TrepiGame
     {
-        bool GameRunning;
+        static bool GameRunning;
 
         TrepiPlayer Player;
-        List<TrepiEnemy> EnemyTypes = new List<TrepiEnemy>();
 
         public TrepiGame()
         {
@@ -22,7 +22,6 @@ namespace JamToast.TrepiClasses
             GameRunning = true;
 
             InitPlayer();
-            InitEnemyTypes();
 
             RunGame();
         }
@@ -30,35 +29,57 @@ namespace JamToast.TrepiClasses
         void InitPlayer()
         {
             Console.WriteLine("Enter name:");
+
             Player = new TrepiPlayer(Console.ReadLine());
+            Player.LevelUp(10);
 
             Console.WriteLine();
             Console.WriteLine("Welcome, " + Player.Name + " to an unforgiving world of pain. Please enjoy =)");
-        }
-
-        void InitEnemyTypes()
-        {
-            EnemyTypes.Add(new TrepiEnemy("Dorru", 10000, 1, 0.6, 1));
-            EnemyTypes.Add(new TrepiEnemy("Mindless Servant", 60, 5, 0.1, 0.45));
-            EnemyTypes.Add(new TrepiEnemy("Flying Pumpkin Head", 15, 20, 0.75, 0.3));
-            EnemyTypes.Add(new TrepiEnemy("Wall Construct", 250, 10, 0.2, 0.2));
+            WaitToContinue();
         }
 
         void RunGame()
-        {
+        {           
+            TrepiEncounter encounter = new TrepiEncounter(Player);
             while (GameRunning)
             {
-                Console.WriteLine("You are in a forest. A thick fog permeates the atmosphere, penetrating your very soul\n[Press Enter to continue]");
-                Console.ReadKey();
+                Console.WriteLine("You are in a forest. A thick fog permeates the atmosphere, penetrating your very soul");
+                WaitToContinue();
 
-                TrepiEncounter encounter = new TrepiEncounter();
-                encounter.SetOptions("Yes", "No", "Maybe");
-
-                int Choice = encounter.GetAndDisplayOptionsChoice();
-                Console.WriteLine("You chose option " + Choice + " which is: " + encounter.Options[Choice]);
+                encounter.RunEncounter();
             }
         }
 
-        
+        public static void WaitToContinue()
+        {
+            Console.WriteLine();
+            Console.WriteLine("[Press Enter to continue]");
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+        public static void EndGame()
+        {
+            GameRunning = false;
+        }
+
+        public static void WriteTitle(string title)
+        {
+            int numOfChars = title.Length + 12; // 5 = on left and right + 2x Spaces
+            string lineSeparator = "";
+            for (int i = 0; i < numOfChars; i++)
+            {
+                lineSeparator += "=";
+            }
+
+            Console.WriteLine(lineSeparator);
+            Console.WriteLine("===== " + title + " =====");
+            Console.WriteLine(lineSeparator);
+        }
+
+        public static void WriteSeparator()
+        {
+            Console.WriteLine("\n==========================================\n");
+        }
     }
 }
