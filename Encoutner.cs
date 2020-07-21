@@ -8,7 +8,8 @@ namespace JamToast
     {
         None,
         Enemy,
-        Consumable
+        Consumable,
+        Lore
     }
     class Encoutner : IEncounter
     {
@@ -24,6 +25,8 @@ namespace JamToast
         private List<Consumable> Consumables = new List<Consumable>();
         private List<Spawnable> Spawnables = new List<Spawnable>();
         private List<LoreEntity> LoreEntities = new List<LoreEntity>();
+
+        private int PreviousIdx;
 
         private Player player;
 
@@ -150,13 +153,31 @@ namespace JamToast
 
         public void RunEncounter()
         {
-            
-            
-            Spawnable entity = Spawnables[GetRandomIndex(Spawnables.Count)]; //choose a random entity from the list
+            int currentIdx = GetRandomIndex(Spawnables.Count);
+            Console.WriteLine("CurrentEntityIdx: " + currentIdx);
+            Spawnable entity = Spawnables[currentIdx];
 
-            //make sure the newly generated encounter isnt the same as teh last encoutner
-            //TODO make this work better ^^^^^^
-            
+            //make sure we dont have the same encounter twice
+            if (PreviousIdx != -1)
+            {
+                Console.WriteLine("checking for the same generated entity...");
+                int newIdx = -1;
+                while(PreviousIdx == currentIdx)
+                {
+                    newIdx = GetRandomIndex(Spawnables.Count);
+                    Console.WriteLine("newIdx: " + newIdx);
+                    entity = Spawnables[newIdx];
+
+                    Console.WriteLine("setting PreviousEntityIdx to newIdx: " + newIdx);
+                    PreviousIdx = newIdx;
+                    
+                }
+
+                if (newIdx != -1)
+                {
+                    currentIdx = newIdx;
+                }
+            }
 
             //check for the entity type and set all the needed text to fit the result
             if (entity is Enemy) //enemy encounter
@@ -232,7 +253,7 @@ namespace JamToast
                         Console.WriteLine("You run away with your tail between your legs");
                         Game.Seperator();
                         HasEnded = true;
-                        FinishEncounter();
+                        StartNewEncoutner(currentIdx);
                     }
 
                     );
@@ -280,7 +301,7 @@ namespace JamToast
                             {
                                 Game.Seperator();
                                 Console.WriteLine("\nYou killed the " + entity.Name + ".");
-                                FinishEncounter();
+                                StartNewEncoutner(currentIdx);
                                 HasEnded = true;
                                 
                             }
@@ -299,7 +320,7 @@ namespace JamToast
                 else if (resultIndex == 1)
                 {
                     HasEnded = true;
-                    FinishEncounter();
+                    StartNewEncoutner(currentIdx);
                 }
             }
 
@@ -324,7 +345,7 @@ namespace JamToast
                             
                             item.heal(player);
 
-                            FinishEncounter();
+                            StartNewEncoutner(currentIdx);
                         }
                     
                     },
@@ -332,7 +353,7 @@ namespace JamToast
                     () => 
                     {
                         Console.WriteLine(item.GetRandomDeclinedFlare());
-                        FinishEncounter();
+                        StartNewEncoutner(currentIdx);
 
                     }
                     
@@ -345,7 +366,8 @@ namespace JamToast
             if(entity is LoreEntity)
             {
                 ((LoreEntity)entity).ShowLore();
-                FinishEncounter();
+                TypeOfEncounter = EncounterType.Consumable;
+                StartNewEncoutner(currentIdx);
             }
 
 
@@ -359,12 +381,16 @@ namespace JamToast
             return ran.Next(0, max);
         }
 
-        void FinishEncounter()
+        
+
+        private void StartNewEncoutner(int previousEntityIdx)
         {
+            Console.WriteLine("Setting PreviousEntityIdx to currentEntityIdx: " + previousEntityIdx);
+            PreviousIdx = previousEntityIdx;
+
             Game.WaitToContinue();
-            
+
             RunEncounter();
         }
-
     }
 }
