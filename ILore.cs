@@ -4,7 +4,8 @@ using System.Text;
 
 namespace JamToast
 {
-    class Class1
+    interface ILore
     {
+        public void ShowLore();
     }
 }

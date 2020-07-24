@@ -122,5 +122,7 @@ namespace JamToast
         {
             Console.WriteLine("--======[ " + text + " ]======--");
         }
+
+        
     }
 }

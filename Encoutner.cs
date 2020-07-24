@@ -8,7 +8,8 @@ namespace JamToast
     {
         None,
         Enemy,
-        Consumable
+        Consumable,
+        Lore
     }
     class Encoutner : IEncounter
     {
@@ -23,8 +24,13 @@ namespace JamToast
         private List<Enemy> Enemies = new List<Enemy>();
         private List<Consumable> Consumables = new List<Consumable>();
         private List<Spawnable> Spawnables = new List<Spawnable>();
+        private List<LoreEntity> LoreEntities = new List<LoreEntity>();
+
+        private int PreviousIdx;
 
         private Player player;
+
+        
 
 
         public Encoutner(Player player)
@@ -36,6 +42,7 @@ namespace JamToast
 
             InitEnemies();
             InitConsumables();
+            InitLoreEntities();
             InitSpawnables();
         }
 
@@ -66,6 +73,13 @@ namespace JamToast
 
         }
 
+        void InitLoreEntities()
+        {
+            LoreEntities.Add(new LoreEntity("You can't help but to feel watched while you walk through the forrest..."));
+            LoreEntities.Add(new LoreEntity("A loud screetch is the distance stops you in your track and sends shivers down your spine...\nYou wait a while but nothing happens"));
+            LoreEntities.Add(new LoreEntity("You stop to rest a while.\nAs you rest, you take in your surroundings.\nYou can't describe how the forrest makes you calm and on-edge at the same time...\n...\nWell... it's time to get back to it."));
+        }
+
         void InitSpawnables()
         {
             foreach (var enemy in Enemies)
@@ -75,6 +89,10 @@ namespace JamToast
             foreach(Consumable consumable in Consumables)
             {
                 Spawnables.Add(consumable);
+            }
+            foreach(LoreEntity lore in LoreEntities)
+            {
+                Spawnables.Add(lore);
             }
         }
 
@@ -135,9 +153,31 @@ namespace JamToast
 
         public void RunEncounter()
         {
+            int currentIdx = GetRandomIndex(Spawnables.Count);
+            Console.WriteLine("CurrentEntityIdx: " + currentIdx);
+            Spawnable entity = Spawnables[currentIdx];
 
-            Spawnable entity = Spawnables[GetRandomIndex(Spawnables.Count)]; //choose a random entity from the list
+            //make sure we dont have the same encounter twice
+            if (PreviousIdx != -1)
+            {
+                Console.WriteLine("checking for the same generated entity...");
+                int newIdx = -1;
+                while(PreviousIdx == currentIdx)
+                {
+                    newIdx = GetRandomIndex(Spawnables.Count);
+                    Console.WriteLine("newIdx: " + newIdx);
+                    entity = Spawnables[newIdx];
 
+                    Console.WriteLine("setting PreviousEntityIdx to newIdx: " + newIdx);
+                    PreviousIdx = newIdx;
+                    
+                }
+
+                if (newIdx != -1)
+                {
+                    currentIdx = newIdx;
+                }
+            }
 
             //check for the entity type and set all the needed text to fit the result
             if (entity is Enemy) //enemy encounter
@@ -213,8 +253,7 @@ namespace JamToast
                         Console.WriteLine("You run away with your tail between your legs");
                         Game.Seperator();
                         HasEnded = true;
-                        Encoutner encounter = new Encoutner(player);
-                        encounter.RunEncounter();
+                        StartNewEncoutner(currentIdx);
                     }
 
                     );
@@ -262,9 +301,7 @@ namespace JamToast
                             {
                                 Game.Seperator();
                                 Console.WriteLine("\nYou killed the " + entity.Name + ".");
-                                Game.WaitToContinue();
-                                Encoutner encounter = new Encoutner(player);
-                                encounter.RunEncounter();
+                                StartNewEncoutner(currentIdx);
                                 HasEnded = true;
                                 
                             }
@@ -283,9 +320,7 @@ namespace JamToast
                 else if (resultIndex == 1)
                 {
                     HasEnded = true;
-                    Game.WaitToContinue();
-                    Encoutner encounter = new Encoutner(player);
-                    encounter.RunEncounter();
+                    StartNewEncoutner(currentIdx);
                 }
             }
 
@@ -310,9 +345,7 @@ namespace JamToast
                             
                             item.heal(player);
 
-                            Game.WaitToContinue();
-                            Encoutner encounter = new Encoutner(player);
-                            encounter.RunEncounter();
+                            StartNewEncoutner(currentIdx);
                         }
                     
                     },
@@ -320,9 +353,7 @@ namespace JamToast
                     () => 
                     {
                         Console.WriteLine(item.GetRandomDeclinedFlare());
-                        Game.WaitToContinue();
-                        Encoutner encounter = new Encoutner(player);
-                        encounter.RunEncounter();
+                        StartNewEncoutner(currentIdx);
 
                     }
                     
@@ -332,7 +363,16 @@ namespace JamToast
 
             }
 
+            if(entity is LoreEntity)
+            {
+                ((LoreEntity)entity).ShowLore();
+                TypeOfEncounter = EncounterType.Consumable;
+                StartNewEncoutner(currentIdx);
+            }
 
+
+
+            
         }
 
         private int GetRandomIndex(int max)
@@ -341,5 +381,16 @@ namespace JamToast
             return ran.Next(0, max);
         }
 
+        
+
+        private void StartNewEncoutner(int previousEntityIdx)
+        {
+            Console.WriteLine("Setting PreviousEntityIdx to currentEntityIdx: " + previousEntityIdx);
+            PreviousIdx = previousEntityIdx;
+
+            Game.WaitToContinue();
+
+            RunEncounter();
+        }
     }
 }
