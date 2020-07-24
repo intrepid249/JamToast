@@ -7,7 +7,7 @@ namespace JamToast
 
         static void Main(string[] args)
         {
-            new Game();
+            new TrepiClasses.TrepiGame();
             
 
             Console.WriteLine("\n\nPress any key to continue...");

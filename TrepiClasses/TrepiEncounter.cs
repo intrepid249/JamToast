@@ -7,11 +7,14 @@ namespace JamToast.TrepiClasses
     {
         None,
         Enemy,
-        Consumable
+        Consumable,
+        Lore
     }
 
     class TrepiEncounter : ITrepiEnounter
     {
+        private List<string> Log = new List<string>();
+
         public List<string> Options { get; private set; }
         public List<Action> Results { get; private set; }
 
@@ -21,7 +24,7 @@ namespace JamToast.TrepiClasses
         private List<TrepiLoreEntity> LoreEntities = new List<TrepiLoreEntity>();
         private List<TrepiSpawnable> Spawnables = new List<TrepiSpawnable>();
 
-        private int PreviousEntity = -1;
+        private int PreviousEntityIdx = -1;
 
         private bool HasEnded = false;
         private TrepiEncounterType TypeOfEncounter = TrepiEncounterType.None;
@@ -145,23 +148,32 @@ namespace JamToast.TrepiClasses
         public void RunEncounter() 
         {
             // Choose a random entity from the list of spawnable entities for the Encounter
-            int entityIdx = GetRandomIndex(Spawnables.Count);
-            Console.WriteLine("EntityIdx: " + entityIdx + " PreviousEntity: " + PreviousEntity);
-            TrepiSpawnable entity = Spawnables[entityIdx];
+            int currentEntityIdx = GetRandomIndex(Spawnables.Count);
+            Console.WriteLine("currentEntityIdx: " + currentEntityIdx + " PreviousEntity: " + PreviousEntityIdx);
+            TrepiSpawnable entity = Spawnables[currentEntityIdx];
 
-            if (PreviousEntity != -1)
+            // If the previous entity index is not invalid (If there is a previously generated entity)
+            if (PreviousEntityIdx != -1)
             {
                 Console.WriteLine("Checking for the same generated entity...");
                 int newIdx = -1;
-                while (PreviousEntity == entityIdx)
+
+                // While the previous entity is the same as the currently selected entity index...
+                while (PreviousEntityIdx == currentEntityIdx)
                 {
+                    // Choose a new index from the list
                     newIdx = GetRandomIndex(Spawnables.Count);
                     Console.WriteLine("newIdx: " + newIdx);
+                    // Select the entity at the index
                     entity = Spawnables[newIdx];
 
+                    // Set the previous entity index to the new selected index
                     Console.WriteLine("Setting PreviousEntity to newIdx: " + newIdx);
-                    PreviousEntity = newIdx;
+                    PreviousEntityIdx = newIdx;
                 }
+
+                // Update the currently selected index to the new duplicate free index that was generated
+                currentEntityIdx = (newIdx != -1) ? newIdx : currentEntityIdx;
             }
 
             // Check for the entity type and set appropriate options and results
@@ -230,7 +242,7 @@ namespace JamToast.TrepiClasses
                         {
                             Console.WriteLine("You run away, crying like a baby...");
                             HasEnded = true;
-                            StartNewEncounter(entityIdx);
+                            StartNewEncounter(currentEntityIdx);
                         }
 
                     );
@@ -307,7 +319,7 @@ namespace JamToast.TrepiClasses
                                 victories.Add("You have slain the " + entity.Name + "!");
 
                                 Console.WriteLine(victories[GetRandomIndex(victories.Count)]);
-                                StartNewEncounter(entityIdx);
+                                StartNewEncounter(currentEntityIdx);
                             }
                         } else
                         {
@@ -333,13 +345,14 @@ namespace JamToast.TrepiClasses
                 {
                     // If we choose to flee
                     HasEnded = true;
-                    StartNewEncounter(entityIdx);
+                    StartNewEncounter(currentEntityIdx);
                 }
             }
 
             if (entity is TrepiConsumable)
             {
                 TrepiConsumable item = (TrepiConsumable)entity;
+                TypeOfEncounter = TrepiEncounterType.Consumable;
 
                 Console.WriteLine(item.GetRandomDiscoveredFlair());
 
@@ -355,13 +368,13 @@ namespace JamToast.TrepiClasses
                             item.Heal(Player);
                         }
 
-                        StartNewEncounter(entityIdx);
+                        StartNewEncounter(currentEntityIdx);
                     },
                     // Leave Alone
                     () => 
                     {
                         Console.WriteLine(item.GetRandomDeclinedFlair());
-                        StartNewEncounter(entityIdx);
+                        StartNewEncounter(currentEntityIdx);
                     }
                     );
 
@@ -372,7 +385,21 @@ namespace JamToast.TrepiClasses
             if (entity is TrepiLoreEntity)
             {
                 ((TrepiLoreEntity)entity).ShowLore();
-                StartNewEncounter(entityIdx);
+                TypeOfEncounter = TrepiEncounterType.Lore;
+                StartNewEncounter(currentEntityIdx);
+            }
+        }
+
+        public void AddLogEntry(string entry)
+        {
+            Log.Add(entry);
+        }
+
+        public void DisplayLog()
+        {
+            foreach (string entry in Log)
+            {
+                Console.WriteLine(entry);
             }
         }
 
@@ -384,8 +411,8 @@ namespace JamToast.TrepiClasses
 
         private void StartNewEncounter(int previousEntityIdx)
         {
-            Console.WriteLine("Setting PreviousEntity to entityIdx: " + previousEntityIdx);
-            PreviousEntity = previousEntityIdx;
+            Console.WriteLine("Setting PreviousEntity to currentEntityIdx: " + previousEntityIdx);
+            PreviousEntityIdx = previousEntityIdx;
 
             TrepiGame.WaitToContinue();
 

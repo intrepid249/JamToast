@@ -166,6 +166,7 @@ namespace JamToast.TrepiClasses
 
             Console.WriteLine("Level: " + (Level - 1) + " -> " + Level);
             TrepiGame.WaitToContinue();
+            Console.Clear();
 
             int[] stats = QueryStatAllocation(pointsAvailable);
             ApplyStatChanges(stats[0], stats[1], stats[2]);
@@ -179,6 +180,7 @@ namespace JamToast.TrepiClasses
 
             Console.WriteLine();
             TrepiGame.WaitToContinue();
+            Console.Clear();
         }
     }
 }

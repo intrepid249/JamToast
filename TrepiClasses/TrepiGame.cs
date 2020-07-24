@@ -46,6 +46,8 @@ namespace JamToast.TrepiClasses
                 Console.WriteLine("You are in a forest. A thick fog permeates the atmosphere, penetrating your very soul");
                 WaitToContinue();
 
+                
+
                 encounter.RunEncounter();
             }
         }
@@ -55,7 +57,7 @@ namespace JamToast.TrepiClasses
             Console.WriteLine();
             Console.WriteLine("[Press Enter to continue]");
             Console.ReadKey();
-            Console.Clear();
+            //Console.Clear();
         }
 
         public static void EndGame()
